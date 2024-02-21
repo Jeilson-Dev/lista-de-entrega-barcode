@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'employee.dart';
 
 class DBHelper {
-  static Database _db;
+  static Database? _db;
   static const String ID = 'id';
   static const String NAME = 'name';
   static const String NAMELOG = 'nameLog';
@@ -14,9 +14,9 @@ class DBHelper {
   static const String TABLE = 'Employee';
   static const String DB_NAME = 'loec.db';
 
-  Future<Database> get db async {
+  Future<Database?> get db async {
     if (_db != null) {
-      return _db;
+      return _db!;
     }
     _db = await initDb();
     return _db;
@@ -30,29 +30,29 @@ class DBHelper {
   }
 
   deleteTable() {
-    _db.delete(TABLE);
+    if (_db != null) _db!.delete(TABLE);
   }
 
   _onCreate(Database db, int version) async {
-    await db.execute(
-        "CREATE TABLE $TABLE ($ID INTEGER PRIMARY KEY, $NAME TEXT, $NAMELOG TEXT, $NAMENUM TEXT)");
+    await db.execute("CREATE TABLE $TABLE ($ID INTEGER PRIMARY KEY, $NAME TEXT, $NAMELOG TEXT, $NAMENUM TEXT)");
   }
 
   Future<Employee> save(Employee employee) async {
     var dbClient = await db;
-    employee.id = await dbClient.insert(TABLE, employee.toMap());
+    if (dbClient != null) employee.id = await dbClient.insert(TABLE, employee.toJson());
     return employee;
   }
 
   Future<List<Employee>> getEmployees() async {
-    var dbClient = await db;
-    List<Map> maps =
-        await dbClient.query(TABLE, columns: [ID, NAME, NAMELOG, NAMENUM]);
-    //List<Map> maps = await dbClient.rawQuery("SELECT * FROM $TABLE");
     List<Employee> employees = [];
-    if (maps.length > 0) {
-      for (int i = 0; i < maps.length; i++) {
-        employees.add(Employee.fromMap(maps[i]));
+    var dbClient = await db;
+    if (dbClient != null) {
+      List<Map> maps = await dbClient.query(TABLE, columns: [ID, NAME, NAMELOG, NAMENUM]);
+
+      if (maps.isNotEmpty) {
+        for (int i = 0; i < maps.length; i++) {
+          if (maps[i] is Map<String, dynamic>) employees.add(Employee.fromJson(maps[i] as Map<String, dynamic>));
+        }
       }
     }
     return employees;
@@ -60,17 +60,18 @@ class DBHelper {
 
   Future<int> delete(int id) async {
     var dbClient = await db;
-    return await dbClient.delete(TABLE, where: '$ID = ?', whereArgs: [id]);
+    if (dbClient != null) return await dbClient.delete(TABLE, where: '$ID = ?', whereArgs: [id]);
+    return -1;
   }
 
   Future<int> update(Employee employee) async {
     var dbClient = await db;
-    return await dbClient.update(TABLE, employee.toMap(),
-        where: '$ID = ?', whereArgs: [employee.id]);
+    if (dbClient != null) return await dbClient.update(TABLE, employee.toJson(), where: '$ID = ?', whereArgs: [employee.id]);
+    return -1;
   }
 
   Future close() async {
     var dbClient = await db;
-    dbClient.close();
+    if (dbClient != null) dbClient.close();
   }
 }

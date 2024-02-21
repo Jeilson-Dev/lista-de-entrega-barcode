@@ -1,4 +1,4 @@
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lista_de_entrega_barcode/db/employee.dart';
@@ -7,34 +7,33 @@ import 'dart:async';
 import 'package:lista_de_entrega_barcode/db/BDHelper.dart';
 import 'package:lista_de_entrega_barcode/lista/viewList.dart';
 
-class DBTestPage extends StatefulWidget {
+class ListaDeEntregasApp extends StatefulWidget {
   final String title;
 
-  DBTestPage({Key key, this.title}) : super(key: key);
+  const ListaDeEntregasApp({super.key, required this.title});
 
   @override
   State<StatefulWidget> createState() {
-    return _DBTestPageState();
+    return _ListaDeEntregasAppState();
   }
 }
 
-class _DBTestPageState extends State<DBTestPage> {
-  //
-  Future<List<Employee>> employees;
+class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
+  Future<List<Employee>> employees = Future.value([]);
   TextEditingController controllerObj = TextEditingController();
   TextEditingController controllerLog = TextEditingController();
   TextEditingController controllerNum = TextEditingController();
-  String name;
-  String nameLog;
-  String nameNum;
-  int curUserId;
+  String name = '';
+  String nameLog = '';
+  String nameNum = '';
+  int curUserId = 0;
   final focusObjetoNode = FocusNode();
   final focusLogradouroNode = FocusNode();
   final focusNumeroNode = FocusNode();
 
-  final formKey = new GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   var dbHelper;
-  bool isUpdating;
+  bool isUpdating = false;
 
   @override
   void initState() {
@@ -57,16 +56,16 @@ class _DBTestPageState extends State<DBTestPage> {
   }
 
   validate() {
-    if (formKey.currentState.validate()) {
-      formKey.currentState.save();
+    if (formKey.currentState != null && formKey.currentState!.validate()) {
+      formKey.currentState!.save();
       if (isUpdating) {
-        Employee e = Employee(curUserId, name, nameLog, nameNum);
+        Employee e = Employee(id: curUserId, name: name, nameLog: nameLog, nameNum: nameNum);
         dbHelper.update(e);
         setState(() {
           isUpdating = false;
         });
       } else {
-        Employee e = Employee(null, name, nameLog, nameNum);
+        Employee e = Employee(id: 0, name: name, nameLog: nameLog, nameNum: nameNum);
         dbHelper.save(e);
       }
       clearName();
@@ -101,27 +100,20 @@ class _DBTestPageState extends State<DBTestPage> {
                             Container(
                               width: 15,
                             ),
-                            Icon(CupertinoIcons.cube_box),
+                            const Icon(CupertinoIcons.cube_box),
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 15.0),
                                 child: TextFormField(
                                   autocorrect: false,
                                   maxLength: 13,
                                   controller: controllerObj,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                        RegExp("[A-Z0-9]"))
-                                  ],
-                                  textCapitalization:
-                                      TextCapitalization.characters,
+                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[A-Z0-9]"))],
+                                  textCapitalization: TextCapitalization.characters,
                                   autofocus: true,
                                   focusNode: focusObjetoNode,
-                                  validator: (val) => val.length == 0
-                                      ? 'Falta o Nº do Objeto'
-                                      : null,
-                                  onSaved: (val) => name = val,
+                                  validator: (val) => (val ?? '').isEmpty ? 'Falta o Nº do Objeto' : null,
+                                  onSaved: (val) => name = (val ?? ''),
                                   onChanged: (String value) async {
                                     if (controllerObj.text.length == 13) {
                                       focusLogradouroNode.requestFocus();
@@ -134,7 +126,7 @@ class _DBTestPageState extends State<DBTestPage> {
                               onTap: () {
                                 scan();
                               },
-                              child: Icon(
+                              child: const Icon(
                                 Icons.search,
                               ),
                             ),
@@ -148,7 +140,7 @@ class _DBTestPageState extends State<DBTestPage> {
                             Container(
                               width: 15,
                             ),
-                            Icon(
+                            const Icon(
                               Icons.map,
                               color: Color(0xff808080),
                             ),
@@ -162,16 +154,10 @@ class _DBTestPageState extends State<DBTestPage> {
                                   maxLength: 25,
                                   controller: controllerLog,
                                   focusNode: focusLogradouroNode,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                        RegExp("[A-Z0-9 .]"))
-                                  ],
-                                  textCapitalization:
-                                      TextCapitalization.characters,
-                                  validator: (val) => val.length == 0
-                                      ? 'Falta o Logradouro'
-                                      : null,
-                                  onSaved: (val) => nameLog = val,
+                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[A-Z0-9 .]"))],
+                                  textCapitalization: TextCapitalization.characters,
+                                  validator: (val) => (val ?? '').isEmpty ? 'Falta o Logradouro' : null,
+                                  onSaved: (val) => nameLog = (val ?? ''),
                                 ),
                               ),
                             ),
@@ -182,21 +168,19 @@ class _DBTestPageState extends State<DBTestPage> {
                             Container(
                               width: 15,
                             ),
-                            Icon(
+                            const Icon(
                               Icons.home,
                               color: Color(0xff808080),
                             ),
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 15.0),
                                 child: TextFormField(
                                   maxLength: 6,
                                   controller: controllerNum,
                                   focusNode: focusNumeroNode,
-                                  validator: (val) =>
-                                      val.length == 0 ? 'Falta o Nº' : null,
-                                  onSaved: (val) => nameNum = val,
+                                  validator: (val) => (val ?? '').isEmpty ? 'Falta o Nº' : null,
+                                  onSaved: (val) => nameNum = (val ?? ''),
                                   keyboardType: TextInputType.number,
                                 ),
                               ),
@@ -211,19 +195,17 @@ class _DBTestPageState extends State<DBTestPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             MaterialButton(
-                                child: Text("Ver Lista"),
+                                child: const Text("Ver Lista"),
                                 onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => VerLista()));
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const VerLista(title: 'Lista')));
                                 }),
                             MaterialButton(
-                                child: Text("Limpar"),
+                                child: const Text("Limpar"),
                                 onPressed: () {
                                   clearName();
                                   focusObjetoNode.requestFocus();
                                 }),
-                            MaterialButton(
-                                child: Text("Adicionar"), onPressed: validate)
+                            MaterialButton(onPressed: validate, child: const Text("Adicionar"))
                           ],
                         ))
                       ],
@@ -238,10 +220,10 @@ class _DBTestPageState extends State<DBTestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         automaticallyImplyLeading: false, // Don't show the leading button
-        title: Row(
+        title: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -254,8 +236,8 @@ class _DBTestPageState extends State<DBTestPage> {
           ],
         ),
       ),
-      body: new Container(
-        child: new Column(
+      body: Container(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           verticalDirection: VerticalDirection.down,
@@ -268,8 +250,10 @@ class _DBTestPageState extends State<DBTestPage> {
   }
 
   Future scan() async {
-    String barcode = await BarcodeScanner.scan();
-    controllerObj.text = barcode;
-    focusLogradouroNode.requestFocus();
+    final scanResult = await BarcodeScanner.scan();
+    if (scanResult.type == ResultType.Barcode) {
+      String barcode = controllerObj.text = scanResult.rawContent;
+      focusLogradouroNode.requestFocus();
+    }
   }
 }

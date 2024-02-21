@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:lista_de_entrega_barcode/db/employee.dart';
 import 'package:lista_de_entrega_barcode/db/BDHelper.dart';
@@ -11,7 +10,7 @@ import 'package:lista_de_entrega_barcode/lista/home.dart';
 class BarcodeLista extends StatefulWidget {
   final String title;
 
-  BarcodeLista({Key key, this.title}) : super(key: key);
+  const BarcodeLista({super.key, required this.title});
 
   @override
   State<StatefulWidget> createState() {
@@ -20,22 +19,22 @@ class BarcodeLista extends StatefulWidget {
 }
 
 class _BarcodeListaState extends State<BarcodeLista> {
-  Future<List<Employee>> employees;
+  Future<List<Employee>> employees = Future.value([]);
   TextEditingController controllerObj = TextEditingController();
   TextEditingController controllerLog = TextEditingController();
   TextEditingController controllerNum = TextEditingController();
-  String name;
-  String nameLog;
-  String nameNum;
-  int curUserId;
-  final classDbHelper = new DBHelper();
+  String name = '';
+  String nameLog = '';
+  String nameNum = '';
+  int curUserId = 0;
+  final classDbHelper = DBHelper();
   final focusObjetoNode = FocusNode();
   final focusLogradouroNode = FocusNode();
   final focusNumeroNode = FocusNode();
 
-  final formKey = new GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   var dbHelper;
-  bool isUpdating;
+  bool isUpdating = false;
 
   @override
   void initState() {
@@ -58,16 +57,16 @@ class _BarcodeListaState extends State<BarcodeLista> {
   }
 
   validate() {
-    if (formKey.currentState.validate()) {
-      formKey.currentState.save();
+    if (formKey.currentState != null && formKey.currentState!.validate()) {
+      formKey.currentState!.save();
       if (isUpdating) {
-        Employee e = Employee(curUserId, name, nameLog, nameNum);
+        Employee e = Employee(id: curUserId, name: name, nameLog: nameLog, nameNum: nameNum);
         dbHelper.update(e);
         setState(() {
           isUpdating = false;
         });
       } else {
-        Employee e = Employee(null, name, nameLog, nameNum);
+        Employee e = Employee(id: 0, name: name, nameLog: nameLog, nameNum: nameNum);
         dbHelper.save(e);
       }
       clearName();
@@ -75,18 +74,18 @@ class _BarcodeListaState extends State<BarcodeLista> {
     }
   }
 
-  SingleChildScrollView dataTable(List<Employee> employees) {
+  SingleChildScrollView dataTable(List<Employee>? employees) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: DataTable(
         headingRowHeight: 0,
         dataRowHeight: 340,
-        columns: [
+        columns: const [
           DataColumn(
             label: Text('Objeto'),
           ),
         ],
-        rows: employees
+        rows: (employees ?? [])
             .map(
               (employee) => DataRow(cells: [
                 DataCell(Column(children: [
@@ -102,19 +101,19 @@ class _BarcodeListaState extends State<BarcodeLista> {
                           children: [
                             BarcodeWidget(
                               barcode: Barcode.code128(),
-                              data: employee.name,
+                              data: employee.name ?? '',
                               width: 300,
                               height: 100,
                             ),
                             BarcodeWidget(
                               barcode: Barcode.code128(),
-                              data: employee.nameLog,
+                              data: employee.nameLog ?? '',
                               width: 300,
                               height: 100,
                             ),
                             BarcodeWidget(
                               barcode: Barcode.code128(),
-                              data: employee.nameNum,
+                              data: employee.nameNum ?? '',
                               width: 300,
                               height: 100,
                             ),
@@ -140,11 +139,11 @@ class _BarcodeListaState extends State<BarcodeLista> {
             return dataTable(snapshot.data);
           }
 
-          if (null == snapshot.data || snapshot.data.length == 0) {
-            return Text("No Data Found");
+          if (null == snapshot.data || snapshot.data!.isEmpty) {
+            return const Text("No Data Found");
           }
 
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         },
       ),
     );
@@ -153,8 +152,8 @@ class _BarcodeListaState extends State<BarcodeLista> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
+      home: Scaffold(
+        appBar: AppBar(
           automaticallyImplyLeading: false, // Don't show the leading button
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -162,21 +161,20 @@ class _BarcodeListaState extends State<BarcodeLista> {
             children: <Widget>[
               IconButton(
                 onPressed: () => {Navigator.of(context).pop()},
-                icon: Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
               ),
-              Text('Códigos'),
+              const Text('Códigos'),
               MaterialButton(
                 onPressed: () => limparLista(),
-                child: Text('Nova Lista',
-                    style: TextStyle(color: Colors.white, fontSize: 18)),
+                child: const Text('Nova Lista', style: TextStyle(color: Colors.white, fontSize: 18)),
               ),
 
               // Your widgets here
             ],
           ),
         ),
-        body: new Container(
-          child: new Column(
+        body: Container(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             verticalDirection: VerticalDirection.down,
@@ -194,8 +192,6 @@ class _BarcodeListaState extends State<BarcodeLista> {
 
   limparLista() async {
     classDbHelper.deleteTable();
-    Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (context) => DBTestPage()));
-    print('ss');
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const ListaDeEntregasApp(title: 'test')));
   }
 }
