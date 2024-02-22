@@ -5,22 +5,32 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "run integration test (debug)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "program": "integration_test/app_test.dart"
+        },
+        {
             "name": "lista_de_entrega_barcode (debug)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "program": "lib/main.dart"
         },
         {
             "name": "lista_de_entrega_barcode (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "program": "lib/main.dart"
         },
         {
             "name": "lista_de_entrega_barcode (release mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "program": "lib/main.dart"
         }
     ]
 }

@@ -1,12 +1,12 @@
 name: lista_de_entrega_barcode
 description: Crie sua lista de entregas usando codigos de barras.
 
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.1.5 <4.0.0'
+  sdk: ">=3.1.5 <4.0.0"
 
 dependencies:
   flutter:
@@ -19,6 +19,10 @@ dependencies:
   barcode_scan2: ^4.3.0
   barcode_widget: ^2.0.1
   flutter_mobile_vision_2: ^0.1.15
+  provider: ^6.1.1
+  get_it: ^7.6.7
+  path: ^1.8.3
+  logger: ^2.0.2+1
 
 dev_dependencies:
   json_serializable: ^6.7.1
@@ -27,8 +31,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
   flutter_lints: ^2.0.0
+  integration_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true

@@ -21,7 +21,11 @@ update-goldens : remove-goldens-failures
 remove-goldens-failures : 
 	rm test/golden_test/failures/*
 
+
 # CODE GENERATION
+
+fix :
+	dart fix --apply
 
 l10n :
 	flutter gen-l10n && arb_utils sort lib/l10n/app_en.arb 

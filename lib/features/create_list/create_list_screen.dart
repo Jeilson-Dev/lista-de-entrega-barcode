@@ -1,81 +1,39 @@
 import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lista_de_entrega_barcode/db/employee.dart';
-import 'package:flutter/cupertino.dart';
-import 'dart:async';
-import 'package:lista_de_entrega_barcode/db/BDHelper.dart';
-import 'package:lista_de_entrega_barcode/lista/viewList.dart';
+import 'package:lista_de_entrega_barcode/core/inject.dart';
+import 'package:lista_de_entrega_barcode/db/db_helper.dart';
+import 'package:lista_de_entrega_barcode/features/create_list/create_list_view_model.dart';
+import 'package:lista_de_entrega_barcode/features/view_list/view_list_screen.dart';
+import 'package:provider/provider.dart';
 
-class ListaDeEntregasApp extends StatefulWidget {
-  final String title;
+class CreateListScreen extends StatefulWidget {
+  const CreateListScreen({super.key});
 
-  const ListaDeEntregasApp({super.key, required this.title});
-
+  static Widget create() => ChangeNotifierProvider(
+        create: (context) => CreateListViewModel(dbHelper: inject<DBHelper>()),
+        child: const CreateListScreen(),
+      );
   @override
   State<StatefulWidget> createState() {
-    return _ListaDeEntregasAppState();
+    return _CreateListScreenState();
   }
 }
 
-class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
-  Future<List<Employee>> employees = Future.value([]);
-  TextEditingController controllerObj = TextEditingController();
-  TextEditingController controllerLog = TextEditingController();
-  TextEditingController controllerNum = TextEditingController();
-  String name = '';
-  String nameLog = '';
-  String nameNum = '';
-  int curUserId = 0;
-  final focusObjetoNode = FocusNode();
-  final focusLogradouroNode = FocusNode();
-  final focusNumeroNode = FocusNode();
-
-  final formKey = GlobalKey<FormState>();
-  var dbHelper;
-  bool isUpdating = false;
+class _CreateListScreenState extends State<CreateListScreen> {
+  CreateListViewModel? model;
 
   @override
   void initState() {
     super.initState();
-    dbHelper = DBHelper();
-    isUpdating = false;
-    refreshList();
-  }
-
-  refreshList() {
-    setState(() {
-      employees = dbHelper.getEmployees();
-    });
-  }
-
-  clearName() {
-    controllerObj.text = '';
-    controllerLog.text = '';
-    controllerNum.text = '';
-  }
-
-  validate() {
-    if (formKey.currentState != null && formKey.currentState!.validate()) {
-      formKey.currentState!.save();
-      if (isUpdating) {
-        Employee e = Employee(id: curUserId, name: name, nameLog: nameLog, nameNum: nameNum);
-        dbHelper.update(e);
-        setState(() {
-          isUpdating = false;
-        });
-      } else {
-        Employee e = Employee(id: 0, name: name, nameLog: nameLog, nameNum: nameNum);
-        dbHelper.save(e);
-      }
-      clearName();
-      refreshList();
-    }
+    model = context.read();
+    WidgetsBinding.instance.addPostFrameCallback((_) async => await model!.refreshList());
   }
 
   form() {
     return Form(
-        key: formKey,
+        key: model!.formKey,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: SingleChildScrollView(
@@ -97,27 +55,24 @@ class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
                       children: [
                         Row(
                           children: [
-                            Container(
-                              width: 15,
-                            ),
+                            Container(width: 15),
                             const Icon(CupertinoIcons.cube_box),
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
                                 child: TextFormField(
+                                  key: const Key('object-key'),
                                   autocorrect: false,
                                   maxLength: 13,
-                                  controller: controllerObj,
-                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[A-Z0-9]"))],
+                                  controller: model!.controllerObj,
+                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[A-Za-z0-9]"))],
                                   textCapitalization: TextCapitalization.characters,
                                   autofocus: true,
-                                  focusNode: focusObjetoNode,
+                                  focusNode: model!.focusObjetoNode,
                                   validator: (val) => (val ?? '').isEmpty ? 'Falta o Nº do Objeto' : null,
-                                  onSaved: (val) => name = (val ?? ''),
+                                  onSaved: (val) => model!.code = (val ?? ''),
                                   onChanged: (String value) async {
-                                    if (controllerObj.text.length == 13) {
-                                      focusLogradouroNode.requestFocus();
-                                    }
+                                    if (model!.controllerObj.text.length == 13) model!.focusLogradouroNode.requestFocus();
                                   },
                                 ),
                               ),
@@ -150,14 +105,15 @@ class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
                                   horizontal: 15,
                                 ),
                                 child: TextFormField(
+                                  key: const Key('address-key'),
                                   autocorrect: false,
                                   maxLength: 25,
-                                  controller: controllerLog,
-                                  focusNode: focusLogradouroNode,
-                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[A-Z0-9 .]"))],
+                                  controller: model!.controllerLog,
+                                  focusNode: model!.focusLogradouroNode,
+                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[A-Za-z0-9 .]"))],
                                   textCapitalization: TextCapitalization.characters,
                                   validator: (val) => (val ?? '').isEmpty ? 'Falta o Logradouro' : null,
-                                  onSaved: (val) => nameLog = (val ?? ''),
+                                  onSaved: (val) => model!.address = (val ?? ''),
                                 ),
                               ),
                             ),
@@ -176,11 +132,12 @@ class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
                                 child: TextFormField(
+                                  key: const Key('number-key'),
                                   maxLength: 6,
-                                  controller: controllerNum,
-                                  focusNode: focusNumeroNode,
+                                  controller: model!.controllerNum,
+                                  focusNode: model!.focusNumeroNode,
                                   validator: (val) => (val ?? '').isEmpty ? 'Falta o Nº' : null,
-                                  onSaved: (val) => nameNum = (val ?? ''),
+                                  onSaved: (val) => model!.number = (val ?? ''),
                                   keyboardType: TextInputType.number,
                                 ),
                               ),
@@ -195,17 +152,19 @@ class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             MaterialButton(
+                                key: const Key('open-list-key'),
                                 child: const Text("Ver Lista"),
                                 onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const VerLista(title: 'Lista')));
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ViewListScreen.create()));
                                 }),
                             MaterialButton(
+                                key: const Key('clean-form-key'),
                                 child: const Text("Limpar"),
                                 onPressed: () {
-                                  clearName();
-                                  focusObjetoNode.requestFocus();
+                                  model!.clearFields();
+                                  model!.focusObjetoNode.requestFocus();
                                 }),
-                            MaterialButton(onPressed: validate, child: const Text("Adicionar"))
+                            MaterialButton(key: const Key('add-key'), onPressed: () async => await model!.save(), child: const Text("Adicionar"))
                           ],
                         ))
                       ],
@@ -220,25 +179,33 @@ class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
 
   @override
   Widget build(BuildContext context) {
+    model = context.watch();
+    if (model!.status.isSaving) {
+      return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false, // Don't show the leading button
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [Text('Criar Lista')],
+            ),
+          ),
+          body: const Center(
+            child: CircularProgressIndicator(),
+          ));
+    }
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // Don't show the leading button
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text('Criar Lista'),
-            IconButton(
-              onPressed: null,
-              icon: Icon(Icons.list, color: Colors.transparent),
-            ),
-            // Your widgets here
-          ],
+          children: [Text('Criar Lista')],
         ),
       ),
-      body: Container(
+      body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           verticalDirection: VerticalDirection.down,
           children: <Widget>[
@@ -252,8 +219,8 @@ class _ListaDeEntregasAppState extends State<ListaDeEntregasApp> {
   Future scan() async {
     final scanResult = await BarcodeScanner.scan();
     if (scanResult.type == ResultType.Barcode) {
-      String barcode = controllerObj.text = scanResult.rawContent;
-      focusLogradouroNode.requestFocus();
+      model!.controllerObj.text = scanResult.rawContent;
+      model!.focusLogradouroNode.requestFocus();
     }
   }
 }
