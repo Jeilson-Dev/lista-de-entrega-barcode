@@ -15,7 +15,7 @@ jobs:
       Greeting: Hello
     steps:
       - name: "Say Hello Mona it's Monday"
-        run: echo "$Greeting $First_Name. Today is $SLACK_WEBHOOK!"
+        run: echo "$Greeting $First_Name. Today is ${{'secrets.SLACK_WEBHOOK'}}!"
         env:
           First_Name: Mona    
 # jobs:
