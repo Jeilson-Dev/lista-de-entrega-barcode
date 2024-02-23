@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    environment: development
     runs-on: macos-latest
 
     steps:
