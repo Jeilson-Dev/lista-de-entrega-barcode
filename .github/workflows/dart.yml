@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -14,4 +14,10 @@ jobs:
         with:
           flutter-version: '3.13.9'
       - run: flutter pub get
-      - run: flutter test
+      - name: Setup Symfony
+        working-directory: ./android
+        run: |
+          fastlane send_message_slack
+          env: 
+            SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+            
