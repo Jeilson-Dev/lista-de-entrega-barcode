@@ -5,20 +5,35 @@ on:
   pull_request:
    
 jobs:
-  build:
-    # runs-on: ubuntu-latest
-    runs-on: macos-latest
+  integration-tests:
+    runs-on: macos-11
     environment: development
-
+    strategy:
+      matrix:
+        api-level:
+          - 29
+      fail-fast: true
     steps:
+      - uses: actions/checkout@v3
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.9'
       - run: flutter pub get
+      - name: Run integration tests
+        # more info on https://github.com/ReactiveCircus/android-emulator-runner
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          profile: Nexus 6
+          script: flutter test integration_test --verbose  
       - name: Run Fastlane
         working-directory: ./android
         run: fastlane send_message_slack
         env: 
             SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
             
+ 
