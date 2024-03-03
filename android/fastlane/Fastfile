@@ -22,19 +22,31 @@ platform :android do
     gradle(task: "test")
   end
 
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(task: "clean assembleRelease")
-    crashlytics
-  
-    # sh "your_script.sh"
-    # You can also use other beta testing services here
-  end
+
 
   desc "Deploy a new version to the Google Play"
   lane :deploy do
     gradle(task: "clean assembleRelease")
     upload_to_play_store
+  end
+
+  lane :beta do
+    gradle(task: 'assemble', build_type: 'Release')
+    upload_to_play_store(
+      track:'beta',
+      version_code:4,
+      version_name:'3.0.1',
+      aab: "/Users/JsonDev/Developer/lista-de-entrega-barcode/build/app/outputs/bundle/release/app-release.aab",
+    
+    )
+    send_message_slack
+  end
+
+  desc "Validate Play Store Key"
+  lane :validate_key do
+    validate_play_store_json_key(
+      json_key: '/Users/JsonDev/Downloads/fastlane-supply-key/GooglePlayConsole-IAM.json'
+    )
   end
 
   desc "Sand a message to slack"

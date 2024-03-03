@@ -21,6 +21,13 @@ update-goldens : remove-goldens-failures
 remove-goldens-failures : 
 	rm test/golden_test/failures/*
 
+# BUILD
+
+flutter-build :
+	flutter build appbundle | sed -n "s/.*Built \(.*\) (.*/\1/p" | tr -d '\n' >> aab_path.tmp
+
+android-fastlane :
+	cd android && fastlane android
 
 # CODE GENERATION
 
@@ -35,3 +42,6 @@ gen :
 
 get :
 	flutter pub get 
+
+clean :
+	flutter clean 

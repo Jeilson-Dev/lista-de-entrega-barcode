@@ -23,14 +23,6 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Runs all the tests
 
-### android beta
-
-```sh
-[bundle exec] fastlane android beta
-```
-
-Submit a new Beta Build to Crashlytics Beta
-
 ### android deploy
 
 ```sh
@@ -38,6 +30,22 @@ Submit a new Beta Build to Crashlytics Beta
 ```
 
 Deploy a new version to the Google Play
+
+### android beta
+
+```sh
+[bundle exec] fastlane android beta
+```
+
+
+
+### android validate_key
+
+```sh
+[bundle exec] fastlane android validate_key
+```
+
+Validate Play Store Key
 
 ### android send_message_slack
 

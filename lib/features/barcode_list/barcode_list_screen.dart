@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lista_de_entrega_barcode/components/barcode_object_delivery_item.dart';
-import 'package:lista_de_entrega_barcode/components/object_delivery_item.dart';
 import 'package:lista_de_entrega_barcode/core/inject.dart';
 import 'package:lista_de_entrega_barcode/db/db_helper.dart';
 import 'package:lista_de_entrega_barcode/features/barcode_list/barcode_list_view_model.dart';
