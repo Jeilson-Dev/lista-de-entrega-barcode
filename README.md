@@ -8,7 +8,7 @@ Aplicativo desenvolvido usando Flutter/Dart, os dados são armazenados em um ban
 
 Através deste aplicativo é possível criar listas de pré cadastro para inserir as informações em outro sistema fazendo a leitura dos códigos de barras.
 
-É possível fer o código de barras da etiqueta usando a camera do dispositivo, para isso é necessário fornecer as permissoes a camera.
+É possível ler o código de barras da etiqueta usando a camera do dispositivo, para isso é necessário fornecer as permissoes a camera.
 
 
 
