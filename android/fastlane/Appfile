@@ -1,0 +1,2 @@
+json_key_file("/Users/JsonDev/Downloads/fastlane-supply-key/GooglePlayConsole-IAM.json")
+package_name("json.ar.lista_de_entrega_barcode")
