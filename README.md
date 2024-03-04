@@ -10,10 +10,6 @@ Através deste aplicativo é possível criar listas de pré cadastro para inseri
 
 É possível ler o código de barras da etiqueta usando a camera do dispositivo, para isso é necessário fornecer as permissoes a camera.
 
-
-
-
-
 ## Fluxo de trabalho
 
 
