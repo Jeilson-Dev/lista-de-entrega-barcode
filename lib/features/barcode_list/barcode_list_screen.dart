@@ -54,7 +54,7 @@ class _BarcodeListScreenState extends State<BarcodeListScreen> {
                   await model!.deleteList();
                   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CreateListScreen.create()));
                 },
-                child: const Text('Nova Lista', style: TextStyle(color: Colors.white, fontSize: 18)),
+                child: const Text('Criar Nova Lista', style: TextStyle(color: Colors.white, fontSize: 18)),
               ),
 
               // Your widgets here
